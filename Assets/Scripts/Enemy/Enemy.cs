@@ -9,6 +9,7 @@ public class Enemy : MonoBehaviour {
     public int maxAttentionSpan = 10;
     public Transform player;
     public float atkD = 3f;
+    public float atkRate = 2f;
     public AudioClip idle;
     public AudioClip atk;
     public Transform[] nodes;
@@ -20,12 +21,14 @@ public class Enemy : MonoBehaviour {
     private AudioSource audioSource;
 
     private int attentionSpan = 0;
+    private float atkTime = 0f;
 
     void Awake(){
         currentStats = stats;
         enemySight = transform.GetChild(0).GetComponent<EnemySight>();
         agent = GetComponent<NavMeshAgent>();
         audioSource = GetComponent<AudioSource>();
+        animObj.wrapMode = WrapMode.Once;
     }
 
     void Update(){
@@ -39,10 +42,8 @@ public class Enemy : MonoBehaviour {
                             nodeIndex = 0;
                         }
                     } else {
-                        if ( !animObj.animation["Allosaurus_Run"].enabled ){
-                            audioSource.clip = idle;
-                            animObj.Play("Allosaurus_Run");
-                        }
+                        audioSource.clip = idle;
+                        animObj.Play("Allosaurus_Run");
                         agent.SetDestination(nodes[nodeIndex].position);
                     }
                 }
@@ -56,10 +57,8 @@ public class Enemy : MonoBehaviour {
                 if ( Vector3.Distance(transform.position,target.transform.position) <= atkD ){
                     Attack();
                 } else {
-                    if ( !animObj.animation["Allosaurus_Run"].enabled ){
-                        audioSource.clip = idle;
-                        animObj.Play("Allosaurus_Run");
-                    }
+                    audioSource.clip = idle;
+                    animObj.Play("Allosaurus_Run");
                     agent.SetDestination(target.transform.position);
                 }
 
@@ -82,11 +81,12 @@ public class Enemy : MonoBehaviour {
     }
 
     private void Attack(){
-        if ( !animObj.animation["Allosaurus_Attack01"].enabled ){
+        if ( Time.time - atkTime >= atkRate ){
             audioSource.clip = atk;
             audioSource.Play();
             animObj.Play("Allosaurus_Attack01");
             target.GetComponent<Player>().Inflict(currentStats.dmg);
+            atkTime = Time.time;
         }
     }
 
@@ -98,7 +98,6 @@ public class Enemy : MonoBehaviour {
         audioSource.Stop();
         agent.Stop();
         StopCoroutine("Attention");
-        animObj.wrapMode = WrapMode.Once;
         animObj.Play("Allosaurus_Die");
 
         while (animObj.isPlaying){
