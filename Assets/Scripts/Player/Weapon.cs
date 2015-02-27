@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 
 public class Weapon : MonoBehaviour {
+    public float dmg;
     public float fireRate;
     public int clipSize;
     public int maxBulletSize;
@@ -80,6 +81,7 @@ public class Weapon : MonoBehaviour {
                 var hitRotation = Quaternion.FromToRotation(-Vector3.forward, hit.normal);
 
                 if ( hit.collider.gameObject.tag == "Enemy" ){
+                    hit.collider.GetComponent<Enemy>().Inflict(dmg);
                     Instantiate(bloodHit, hit.point, hitRotation);
                 } else if ( hit.collider.gameObject.tag != "Invisible" ){
                     Instantiate(bulletDecal, hit.point, hitRotation);

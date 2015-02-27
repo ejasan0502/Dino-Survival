@@ -11,4 +11,13 @@ public class Player : MonoBehaviour {
     void Awake(){
         currentStats = stats;
     }
+
+    public void Inflict(float rawDmg){
+        float dmg = rawDmg - currentStats.def;
+        if ( dmg < 1 ) dmg = 1f;
+        currentStats.hp -= dmg;
+        if ( currentStats.hp < 1 ){
+            Console.Log("Death");
+        }
+    }
 }
